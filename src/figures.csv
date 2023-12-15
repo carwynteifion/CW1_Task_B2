@@ -1,0 +1,14 @@
+personalAllowance, 12570, 0
+basicRate, 50270, 0.2
+higherRate, 125140, 0.4
+additionalRate, 125141, 0.45
+basicNI, 12570, 0
+higherNI, 50270, 0.12
+additionalNI, 50271, 0.02
+pensionOne, 32135.99, 0.074
+pensionTwo, 43259.99, 0.086
+pensionThree, 51292.99, 0.096
+pensionFour, 67979.99, 0.102
+pensionFive, 92697.99, 0.113
+pensionMax, 92698, 0.117
+parking, 10
