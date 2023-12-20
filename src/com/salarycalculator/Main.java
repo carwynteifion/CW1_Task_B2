@@ -1,7 +1,9 @@
 // Java's built-in scanner utility needs to be imported so that user input can be read
+package com.salarycalculator;
 import java.util.Scanner;
-//import java.io.FileWriter;
-//import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
