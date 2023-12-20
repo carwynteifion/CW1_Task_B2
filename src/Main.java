@@ -1,7 +1,8 @@
 // Java's built-in scanner utility needs to be imported so that user input can be read
-package com.salarycalculator;
 import java.util.Scanner;
-import com.salarycalculator.CSVReader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
@@ -89,16 +90,19 @@ public class Main {
         double personalAllowance = 12570;
         double basicRate = 50270;
         double higherRate = 125140;
-        double basicTaxAmount = Math.min(basicRate - personalAllowance, i - personalAllowance) * 0.2;
-        double higherTaxAmount = Math.min(higherRate - basicRate, i - basicRate) * 0.4;
-        double additionalAmount = (i-higherRate) * 0.45;
+        double basicMultiplier = 0.2;
+        double higherMultiplier = 0.4;
+        double additionalMultiplier = 0.45;
+        double basicTaxAmount = Math.min(basicRate - personalAllowance, i - personalAllowance) * basicMultiplier;
+        double higherTaxAmount = Math.min(higherRate - basicRate, i - basicRate) * higherMultiplier;
+        double additionalAmount = (i-higherRate) * additionalMultiplier;
         if(i > personalAllowance) {
             taxAmount += basicTaxAmount;
         }
-        if(i > 50270) {
+        if(i > basicRate) {
             taxAmount += higherTaxAmount;
         }
-        if (i > 125140) {
+        if (i > higherRate) {
             taxAmount += additionalAmount;
         }
         return taxAmount;
@@ -108,29 +112,59 @@ public class Main {
         double niAmount = 0;
         double lowNI = 12570;
         double highNI = 50270;
-        if(i > 12570) {
-            niAmount += Math.min(highNI - lowNI, i - lowNI) * 0.12;
+        double lowNIMultiplier = 0.12;
+        double highNIMultiplier = 0.02;
+        if(i > lowNI) {
+            niAmount += Math.min(highNI - lowNI, i - lowNI) * lowNIMultiplier;
         }
-        if(i > 50270) {
-            niAmount += (i - highNI) * 0.02;
+        if(i > highNI) {
+            niAmount += (i - highNI) * highNIMultiplier;
         }
         return niAmount;
     }
 
     static double teachersPension(double i) {
         double pensionAmount;
-        if (i <= 32135.99)
-            pensionAmount = 0.074*i;
-        else if(i <= 43259.99)
-            pensionAmount = 0.086*i;
-        else if(i <= 51292.99)
-            pensionAmount = 0.096*i;
-        else if(i <= 67979.99)
-            pensionAmount = 0.102*i;
-        else if(i <= 92697.99)
-            pensionAmount = 0.113*i;
+        double pensionOne = 32135.99;
+        double multiplierOne = 0.074;
+        double pensionTwo = 43259.99;
+        double multiplierTwo = 0.086;
+        double pensionThree = 51292.99;
+        double multiplierThree = 0.096;
+        double pensionFour = 67979.99;
+        double multiplierFour = 0.102;
+        double pensionFive = 92697.99;
+        double multiplierFive = 0.113;
+        double multiplierMax = 0.117;
+        if (i <= pensionOne)
+            pensionAmount = multiplierOne*i;
+        else if(i <= pensionTwo)
+            pensionAmount = multiplierTwo*i;
+        else if(i <= pensionThree)
+            pensionAmount = multiplierThree*i;
+        else if(i <= pensionFour)
+            pensionAmount = multiplierFour*i;
+        else if(i <= pensionFive)
+            pensionAmount = multiplierFive*i;
         else
-            pensionAmount = 0.117*i;
+            pensionAmount = multiplierMax*i;
         return pensionAmount;
+    }
+
+    static void CSVReader() {
+        String figures = "figures.csv";
+        String line = "";
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(figures));
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(",");
+                String valueTypes = values[0];
+                String numbers = values[1];
+                String percentages = values[2];
+                System.out.println(valueTypes);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
