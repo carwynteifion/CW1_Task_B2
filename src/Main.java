@@ -212,6 +212,7 @@ public class Main {
         return taxAmount;
     }
 
+    // Same as above with respect to national insurance. Also supports dynamic number of bands via for loop.
     static double yearlyNI(double income, Map<String, List<ConfigData>> config) {
         double niAmount = 0;
         List<ConfigData> niConfig = config.get("nationalinsurance");
@@ -227,6 +228,7 @@ public class Main {
         return niAmount;
     }
 
+    // Returns parking fee set in the CSV
     static double parkingFee(Map<String, List<ConfigData>> config) {
         double parkingFeeAmount = 0;
         List<ConfigData> parkingConfig = config.get("parking");
@@ -234,6 +236,7 @@ public class Main {
         return parkingFeeAmount;
     }
 
+    // Returns pension based on income from user, and pension bands in CSV
     static double teachersPension(double income, Map<String, List<ConfigData>> config) {
         List<ConfigData> pensionConfig = config.get("pension");
         for (int i = 0; i < pensionConfig.size(); i++) {
@@ -246,6 +249,12 @@ public class Main {
         return -1;
     }
 
+    /*
+    CSV reader
+    Method will attempt to read figures.csv - if no such file exists an error is thrown.
+    If able to locate CSV, the file will be read and the program can be run. This means
+    any correctly formatted CSV can be loaded in and the values can then be used.
+    */
     static Map<String, List<ConfigData>> readCSVFile() {
         String figures = "figures.csv";
         String line;
@@ -268,6 +277,9 @@ public class Main {
         return configMap;
     }
 
+    /*
+    Custom class to hold numbers and percentages of each figure in the CSV.
+    */
     static class ConfigData {
         public double number;
         public double percentage;
