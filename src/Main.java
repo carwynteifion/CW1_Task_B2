@@ -1,21 +1,38 @@
-import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Main {
+    // Creates new scanner object to read user input
     Scanner scanner = new Scanner(System.in);
+    /* Creates a Map object named config expecting key-value pairs of
+    a String (the .csv file to read) and a List of the ConfigData
+    */
     Map<String, List<ConfigData>> config;
 
     public Main(){
-        // Read CSV config file for tax/NI/pension/parking amounts
+        // Reads CSV config file for tax/NI/pension/parking amounts
         config = readCSVFile();
     }
 
     public static void main(String[] args) {
+        // Runs the program
         new Main().run(args);
     }
     public void run(String[] args) {
+        /*
+        This is the core program. First, displayWelcome() is run. Then, the user inputs
+        for name and employee number are collected using getName() and getEmployeeNumber()
+        and stored in the values fullName and employeeNumber respectively.
+        The getYearlyGrossSalary() method calculates the salary and assigns this to the
+        double yearlyGrossSalary. This is then passed through the method
+        calculateMonthlySalary to produce the final output.
+         */
 
         displayWelcome();
 
@@ -32,35 +49,55 @@ public class Main {
     }
 
     private void calculateMonthlySalary(double yearlyGrossSalary) {
+        // Confirms to user that pay is being calculated
         System.out.println("\nCalculating Monthly Net Pay....\n");
+        String pensionOption = String.valueOf(getPensionOption());
+        String parkingFeeOption = String.valueOf(getParkingFeeOption());
 
+        // Calculates and displays gross monthly salary
         double grossMonthlySalary = yearlyGrossSalary / 12;
         System.out.printf("Gross salary: %.2f\n", grossMonthlySalary);
 
+        // Calculates and displays monthly teachers' pension
         double yearlyTeachersPension = teachersPension(yearlyGrossSalary, config);
         double monthlyTeachersPension = yearlyTeachersPension / 12;
-        System.out.printf("Pension deductions: %.2f\n", monthlyTeachersPension);
+        double taxableAmount = yearlyGrossSalary;
+        if (pensionOption.equals("true")) {
+            System.out.printf("Pension deductions: %.2f\n", monthlyTeachersPension);
+            taxableAmount -= yearlyTeachersPension;
+        } else {
+            monthlyTeachersPension = 0;
+        }
 
-        double taxableAmount = yearlyGrossSalary - yearlyTeachersPension;
+        // Calculates and displays monthly taxable amount and ensures this figure is not negative
         double personalAllowance = 12570;
         double monthlyTaxableAmount = (taxableAmount - personalAllowance) / 12;
         if (monthlyTaxableAmount < 0)
             monthlyTaxableAmount = 0;
         System.out.printf("Taxable amount: %.2f\n", monthlyTaxableAmount);
 
+        // Calculates and displays monthly income tax
         double monthlyIncomeTax = yearlyIncomeTax(taxableAmount, config) / 12;
         System.out.printf("Tax paid: %.2f\n", monthlyIncomeTax);
 
+        // Calculates and displays monthly NI
         double monthlyNI = yearlyNI(taxableAmount, config) / 12;
         System.out.printf("NI paid: %.2f\n", monthlyNI);
 
-        double parkingFee = 10;
-        System.out.printf("Monthly parking fee: %.2f\n\n", parkingFee);
+        // Displays parking fee
+        double parkingFee = parkingFee(config);
+        if (parkingFeeOption.equals("true")) {
+            System.out.printf("Monthly parking fee: %.2f\n\n", parkingFee);
+        } else {
+            parkingFee = 0;
+        }
 
         double totalDeductions = monthlyNI + monthlyIncomeTax + monthlyTeachersPension + parkingFee;
         System.out.printf("Total deductions: %.2f\n", totalDeductions);
 
         double monthlyNetPay = grossMonthlySalary - totalDeductions;
+        if (monthlyNetPay < 0)
+            monthlyNetPay = 0;
         System.out.printf("Monthly Net Pay: %.2f\n", monthlyNetPay);
     }
 
@@ -113,6 +150,36 @@ public class Main {
         return fullName;
     }
 
+    public boolean getPensionOption() {
+        System.out.print("Include teacher's pension in calculation? (Y/N)");
+        while (true) {
+            String pensionOption = scanner.nextLine().toLowerCase();
+            switch (pensionOption) {
+                case "y": {
+                    return true;
+                }
+                case "n": {
+                    return false;
+                }
+            }
+        }
+    }
+
+    public boolean getParkingFeeOption() {
+        System.out.print("Include parking fee in calculation? (Y/N)");
+        while (true) {
+            String parkingFeeOption = scanner.nextLine().toLowerCase();
+            switch (parkingFeeOption) {
+                case "y": {
+                    return true;
+                }
+                case "n": {
+                    return false;
+                }
+            }
+        }
+    }
+
     static double yearlyIncomeTax(double income, Map<String, List<ConfigData>> config) {
         double taxAmount = 0;
         List<ConfigData> taxConfig = config.get("incometax");
@@ -143,6 +210,13 @@ public class Main {
         return niAmount;
     }
 
+    static double parkingFee(Map<String, List<ConfigData>> config) {
+        double parkingFeeAmount = 0;
+        List<ConfigData> parkingConfig = config.get("parking");
+        parkingFeeAmount = parkingConfig.get(0).number;
+        return parkingFeeAmount;
+    }
+
     static double teachersPension(double income, Map<String, List<ConfigData>> config) {
         List<ConfigData> pensionConfig = config.get("pension");
         for (int i = 0; i < pensionConfig.size(); i++) {
@@ -157,7 +231,7 @@ public class Main {
 
     static Map<String, List<ConfigData>> readCSVFile() {
         String figures = "figures.csv";
-        String line = "";
+        String line;
         Map<String,List<ConfigData>> configMap = new HashMap<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(figures));
