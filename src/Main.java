@@ -11,7 +11,7 @@ public class Main {
     // Creates new scanner object to read user input
     Scanner scanner = new Scanner(System.in);
     /* Creates a Map object named config expecting key-value pairs of
-    a String (the .csv file to read) and a List of the ConfigData
+    a String (the .csv file to read) and a List of the ConfigData custom class
     */
     Map<String, List<ConfigData>> config;
 
@@ -49,16 +49,18 @@ public class Main {
     }
 
     private void calculateMonthlySalary(double yearlyGrossSalary) {
-        // Confirms to user that pay is being calculated
-        System.out.println("\nCalculating Monthly Net Pay....\n");
+        // Gets answers for optional deductions
         String pensionOption = String.valueOf(getPensionOption());
         String parkingFeeOption = String.valueOf(getParkingFeeOption());
+
+        // Confirms to user that pay is being calculated
+        System.out.println("\nCalculating Monthly Net Pay....\n");
 
         // Calculates and displays gross monthly salary
         double grossMonthlySalary = yearlyGrossSalary / 12;
         System.out.printf("Gross salary: %.2f\n", grossMonthlySalary);
 
-        // Calculates and displays monthly teachers' pension
+        // Calculates and displays monthly teachers' pension if selected by user
         double yearlyTeachersPension = teachersPension(yearlyGrossSalary, config);
         double monthlyTeachersPension = yearlyTeachersPension / 12;
         double taxableAmount = yearlyGrossSalary;
@@ -84,7 +86,7 @@ public class Main {
         double monthlyNI = yearlyNI(taxableAmount, config) / 12;
         System.out.printf("NI paid: %.2f\n", monthlyNI);
 
-        // Displays parking fee
+        // Displays parking fee if selected by user
         double parkingFee = parkingFee(config);
         if (parkingFeeOption.equals("true")) {
             System.out.printf("Monthly parking fee: %.2f\n\n", parkingFee);
@@ -92,9 +94,11 @@ public class Main {
             parkingFee = 0;
         }
 
+        // Adds up deductions and displays total (pension and parking equal 0 if not selected)
         double totalDeductions = monthlyNI + monthlyIncomeTax + monthlyTeachersPension + parkingFee;
         System.out.printf("Total deductions: %.2f\n", totalDeductions);
 
+        // Calculates and displays monthly net pay, and ensures answer is not negative
         double monthlyNetPay = grossMonthlySalary - totalDeductions;
         if (monthlyNetPay < 0)
             monthlyNetPay = 0;
@@ -130,9 +134,12 @@ public class Main {
         System.out.print("Employee name: ");
         String fullName;
 
-        /* Ensures fullName user input only consists of letters and spaces, is not an empty string,
+        /*
+        Ensures fullName user input only consists of letters and spaces, is not an empty string,
         and contains a space which is not at the start or end of the string, before proceeding. The user receives
-        the appropriate error message if their input matches any of these conditions. */
+        the appropriate error message if their input matches any of these conditions.
+        */
+
         while (true) {
             fullName = scanner.nextLine();
             if (!fullName.matches("^[-'a-zA-ZÀ-ÿ\\s]*$")) {
@@ -149,9 +156,8 @@ public class Main {
         }
         return fullName;
     }
-
+    // Selector for option to add pension to calculation
     public boolean getPensionOption() {
-        System.out.print("Include teacher's pension in calculation? (Y/N)");
         while (true) {
             String pensionOption = scanner.nextLine().toLowerCase();
             switch (pensionOption) {
@@ -161,12 +167,15 @@ public class Main {
                 case "n": {
                     return false;
                 }
+                default: {
+                    System.out.print("Include teacher's pension in calculation? (Y/N)");
+                }
             }
         }
     }
 
+    // Selector for option to add parking fee to calculation
     public boolean getParkingFeeOption() {
-        System.out.print("Include parking fee in calculation? (Y/N)");
         while (true) {
             String parkingFeeOption = scanner.nextLine().toLowerCase();
             switch (parkingFeeOption) {
@@ -176,10 +185,18 @@ public class Main {
                 case "n": {
                     return false;
                 }
+                default: {
+                    System.out.print("Include parking fee in calculation? (Y/N)");
+                }
             }
         }
     }
 
+    /*
+    Uses tax bands from figures.csv to calculate annual tax figure.
+    The for loop allows for any number of tax bands in the csv to be iterated through
+    to obtain the correct tax band depending on the user-provided income figure.
+    */
     static double yearlyIncomeTax(double income, Map<String, List<ConfigData>> config) {
         double taxAmount = 0;
         List<ConfigData> taxConfig = config.get("incometax");
