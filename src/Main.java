@@ -176,6 +176,7 @@ public class Main {
 
     // Selector for option to add parking fee to calculation
     public boolean getParkingFeeOption() {
+        System.out.print("Include parking fee in calculation? (Y/N)");
         while (true) {
             String parkingFeeOption = scanner.nextLine().toLowerCase();
             switch (parkingFeeOption) {
@@ -230,7 +231,7 @@ public class Main {
 
     // Returns parking fee set in the CSV
     static double parkingFee(Map<String, List<ConfigData>> config) {
-        double parkingFeeAmount = 0;
+        double parkingFeeAmount;
         List<ConfigData> parkingConfig = config.get("parking");
         parkingFeeAmount = parkingConfig.get(0).number;
         return parkingFeeAmount;
